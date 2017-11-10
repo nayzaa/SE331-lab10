@@ -33,7 +33,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
     public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception{
-        authenticationManagerBuilder.userDetailsService(this.userDetailsService).passwordEncoder(passwordEncoder());
+        authenticationManagerBuilder.userDetailsService(this.userDetailsService);
+//                .passwordEncoder(passwordEncoder());
     }
 
     @Bean
@@ -51,8 +52,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         httpSecurity.csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                .antMatchers("/course").permitAll()
-                .antMatchers("/auth/**").permitAll().anyRequest().authenticated();
+//                .antMatchers("/course").permitAll()
+                .antMatchers("/auth/**","/h2-console/**","/refresh").permitAll().anyRequest().authenticated();
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
         httpSecurity.headers().cacheControl();
     }

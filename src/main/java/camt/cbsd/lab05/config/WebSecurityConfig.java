@@ -18,6 +18,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.multipart.support.MultipartFilter;
+
+import javax.servlet.ServletContext;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
@@ -47,13 +52,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         return new JwtAuthenticationTokenFilter();
     }
 
+    @Bean
+    public WebApplicationInitializer setMultipartFilter(){
+        return new AbstractSecurityWebApplicationInitializer() {
+            @Override
+            protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
+                insertFilters(servletContext,new MultipartFilter());
+            }
+        };
+    }
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
 //                .antMatchers("/course").permitAll()
-                .antMatchers("/auth/**","/h2-console/**","/refresh").permitAll().anyRequest().authenticated();
+                .antMatchers("/auth/**","/h2-console/**","/refresh","/images/**").permitAll().anyRequest().authenticated();
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
         httpSecurity.headers().cacheControl();
     }
